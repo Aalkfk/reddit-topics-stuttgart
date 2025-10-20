@@ -1,0 +1,889 @@
+<h1>/r/Stuttgart – Themenanalyse</h1>
+<p><b>Dokument erstellt:</b> 2025-10-20 22:42</p>
+<h2>Meta</h2><ul><li>Dokumente: 914</li><li>Flairs: 7</li></ul>
+<h2>Methodik (Kurz)</h2><div style='white-space:pre-wrap'>Zeitraum: 2024-10-20 bis 2025-10-20
+Vorverarbeitung: Bereinigung (Kleinbuchstaben, URLs entfernen), Tokenisierung, Stoppwörter (NLTK/fallback), N-Gramme (1–2).
+Merkmale: Bag-of-Words (Count) + TF-IDF.
+Themenmodellierung: LDA (k via Coherence c_v) mit Fallback Log-Likelihood.
+Optional: LSA (TruncatedSVD) zum Vergleich (wird nur bei stabiler Matrix gezeigt).
+Pro-Flair-Modellierung ab mindestens 40 Dokumenten, sonst globaler Fallback.
+Qualitätssicherung: Duplikate (MD5 auf normalisiertem Text), heuristisches Filtering (Token-Mindestlänge, URL-Anteil).
+k-Selektion (global): bestes k = 6 in [6, 7, 8, 9, 10, 11, 12].</div>
+<h2>Ethik & Nutzung</h2><div style='white-space:pre-wrap'>• Ausschließlich öffentliche Inhalte (Reddit-Beiträge/Kommentare) werden verarbeitet.
+• Keine Profilbildung, keine personenbezogene Auswertung; Ergebnisse sind aggregiert (Flairs, Themen, Top-Begriffe).
+• Beachtung der Reddit-API-Nutzungsbedingungen und Content Policies; Zugriff über offizielle API.
+• Kommentare werden nur optional zur Kontextanreicherung einbezogen.
+• Links im Report verweisen auf Originalbeiträge; keine Speicherung sensibler Personendaten.</div>
+<h2>Top Flairs</h2><table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>flair</th>
+      <th>count</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Looking for...</td>
+      <td>340</td>
+    </tr>
+    <tr>
+      <td>Frage / Advice</td>
+      <td>326</td>
+    </tr>
+    <tr>
+      <td>Diskussion</td>
+      <td>97</td>
+    </tr>
+    <tr>
+      <td>Events</td>
+      <td>72</td>
+    </tr>
+    <tr>
+      <td>Sonstiges</td>
+      <td>36</td>
+    </tr>
+    <tr>
+      <td>News</td>
+      <td>30</td>
+    </tr>
+    <tr>
+      <td></td>
+      <td>12</td>
+    </tr>
+    <tr>
+      <td>(ohne Flair)</td>
+      <td>1</td>
+    </tr>
+  </tbody>
+</table>
+<h2>Aktivste Nutzer</h2><table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>author</th>
+      <th>count</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>ipreferwine456</td>
+      <td>23</td>
+    </tr>
+    <tr>
+      <td>[deleted]</td>
+      <td>13</td>
+    </tr>
+    <tr>
+      <td>fanofreddithello</td>
+      <td>6</td>
+    </tr>
+    <tr>
+      <td>Learningto_fly</td>
+      <td>5</td>
+    </tr>
+    <tr>
+      <td>Specialist_Damage438</td>
+      <td>5</td>
+    </tr>
+    <tr>
+      <td>Realistic-Bag-1971</td>
+      <td>5</td>
+    </tr>
+    <tr>
+      <td>BadinBaden</td>
+      <td>5</td>
+    </tr>
+    <tr>
+      <td>spdrschwn</td>
+      <td>5</td>
+    </tr>
+    <tr>
+      <td>RedJames17</td>
+      <td>5</td>
+    </tr>
+    <tr>
+      <td>Ok-Author-8439</td>
+      <td>4</td>
+    </tr>
+    <tr>
+      <td>Biscotti-90</td>
+      <td>4</td>
+    </tr>
+    <tr>
+      <td>EarHairy9462</td>
+      <td>4</td>
+    </tr>
+    <tr>
+      <td>IBmyownboss</td>
+      <td>4</td>
+    </tr>
+    <tr>
+      <td>accounting_cunt</td>
+      <td>4</td>
+    </tr>
+    <tr>
+      <td>servushalloo</td>
+      <td>3</td>
+    </tr>
+    <tr>
+      <td>Remote-Juice2527</td>
+      <td>3</td>
+    </tr>
+    <tr>
+      <td>johoham</td>
+      <td>3</td>
+    </tr>
+    <tr>
+      <td>youssef_nuggets</td>
+      <td>3</td>
+    </tr>
+    <tr>
+      <td>CaptainParger</td>
+      <td>3</td>
+    </tr>
+    <tr>
+      <td>Stuttdawg</td>
+      <td>3</td>
+    </tr>
+  </tbody>
+</table>
+<hr><h2>Global – LDA Themen</h2>
+<ol><li>the, and, for, that, you, have, but, with, any, from, this, are</li><li>jemand, schon, mal, hallo, mehr, danke, suche, gibt, immer, seit, stuttgarter, kennt</li><li>jemand, zusammen, hallo, mal, schon, leute, danke, hallo zusammen, gerne, wochen, suche, mehr</li><li>jemand, gibt, gerne, danke, mal, mehr, wirklich, suche, hallo, schon, immer, einfach</li><li>jemand, mal, suche, gerne, leute, schon, hallo, gibt, zusammen, danke, habt, paar</li><li>for, and, the, any, that, have, looking, would, with, looking for, but, you</li></ol>
+<hr><h2>Pro Flair</h2>
+<h3>(ohne Flair)</h3>
+<b>TF-IDF Top-Begriffe:</b> the, and, for, are, tattoo, here, there, people, döner, this, festival, with
+<h3>Diskussion</h3>
+<b>TF-IDF Top-Begriffe:</b> the, and, for, stadt, from, mal, mehr, that, jahren, immer, this, have
+<details><summary><b>LDA Themen</b></summary><ol><li>to, and, the, in, stuttgart, for, my, is, die, card, that, of</li><li>die, in, zu, das, zu verschenken, verschenken, sind, noch, wird, sind die, ich, aber</li><li>in, die, und, der, das, ich, es, stuttgart, den, the, für, nicht</li><li>ich, die, in, oder, es, das, was, zu, für, und, man, einen</li><li>es, die, nicht, das, oder, der, und, wenn, auch, ich, lime, in</li><li>der, ich, ihr, in, und, die, ein, wie, nicht, ist, mal, mich</li><li>in, die, to, und, ich, for, and, der, mit, was, the, an</li><li>to, ich, in, hat, the, going to, going, dass, fikstionsbescheinigung, to the, back to, meistens</li><li>the, to, for, ich, und, and, from, is, work, leitung, besetzt, leitung besetzt</li><li>und, in, ich, der, die, das, zu, ist, stuttgart, was, eine, auf</li><li>in, the, and, stuttgart, to, is, but, in the, it, böblingen, sindelfingen, das</li></ol></details>
+<b>Beispiel-Posts pro LDA-Thema:</b><table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>topic</th>
+      <th>title</th>
+      <th>flair</th>
+      <th>permalink</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>0</td>
+      <td>Modern Problems require Modern Solutions…Blue Card Extension in Stuttgart.</td>
+      <td>Diskussion</td>
+      <td>https://www.reddit.com/r/stuttgart/comments/1mo77wx/modern_problems_require_modern_solutionsblue_card/</td>
+    </tr>
+    <tr>
+      <td>0</td>
+      <td>Went to a bar last night and had water thrown at</td>
+      <td>Diskussion</td>
+      <td>https://www.reddit.com/r/stuttgart/comments/1nmxfcx/went_to_a_bar_last_night_and_had_water_thrown_at/</td>
+    </tr>
+    <tr>
+      <td>0</td>
+      <td>Wie ist es in Stuttgart Mitte zu leben?</td>
+      <td>Diskussion</td>
+      <td>https://www.reddit.com/r/stuttgart/comments/1o2hne9/wie_ist_es_in_stuttgart_mitte_zu_leben/</td>
+    </tr>
+    <tr>
+      <td>1</td>
+      <td>Zu-verschenken-Kisten in Stuttgart-West.</td>
+      <td>Diskussion</td>
+      <td>https://www.reddit.com/r/stuttgart/comments/1mi5jxi/zuverschenkenkisten_in_stuttgartwest/</td>
+    </tr>
+    <tr>
+      <td>1</td>
+      <td>Aufzüge am Hbf stinken abartig nach Urin. Wie widerlich sind die Menschen in Deutschland bitte?</td>
+      <td>Diskussion</td>
+      <td>https://www.reddit.com/r/stuttgart/comments/1nqi747/aufzüge_am_hbf_stinken_abartig_nach_urin_wie/</td>
+    </tr>
+    <tr>
+      <td>1</td>
+      <td>Den Jh. Sommer von 2003 nennt man heutzutage einfach nur noch Sommer</td>
+      <td>Diskussion</td>
+      <td>https://www.reddit.com/r/stuttgart/comments/1lk97dc/den_jh_sommer_von_2003_nennt_man_heutzutage/</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>Wie hat sich Stuttgart-Ost rund um den Ostendplatz eurer Meinung nach verändert?</td>
+      <td>Diskussion</td>
+      <td>https://www.reddit.com/r/stuttgart/comments/1lec5sj/wie_hat_sich_stuttgartost_rund_um_den_ostendplatz/</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>"Stuttgarter Talkessel: ein Krisengebiet"</td>
+      <td>Diskussion</td>
+      <td>https://www.reddit.com/r/stuttgart/comments/1ne7wkj/stuttgarter_talkessel_ein_krisengebiet/</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>S-Bahn: geplante Streckensperrungen 2025-2027</td>
+      <td>Diskussion</td>
+      <td>https://www.reddit.com/r/stuttgart/comments/1o0jqio/sbahn_geplante_streckensperrungen_20252027/</td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td>Fragen an erfahrene Besucher von DAS LEUZE</td>
+      <td>Diskussion</td>
+      <td>https://www.reddit.com/r/stuttgart/comments/1o0a4uc/fragen_an_erfahrene_besucher_von_das_leuze/</td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td>Schwabstraßen Hate</td>
+      <td>Diskussion</td>
+      <td>https://www.reddit.com/r/stuttgart/comments/1na5vm1/schwabstraßen_hate/</td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td>Leute: Verkaufsautomat</td>
+      <td>Diskussion</td>
+      <td>https://www.reddit.com/r/stuttgart/comments/1n90gbm/leute_verkaufsautomat/</td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td>Meshtastic in Stuttgart?</td>
+      <td>Diskussion</td>
+      <td>https://www.reddit.com/r/stuttgart/comments/1miyimf/meshtastic_in_stuttgart/</td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td>Was haltet ihr davon: Lime wird neuer Partner für das Fahrradverleihsystem in der Region Stuttgart</td>
+      <td>Diskussion</td>
+      <td>https://www.reddit.com/r/stuttgart/comments/1o0f0tc/was_haltet_ihr_davon_lime_wird_neuer_partner_für/</td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td>BrezelRace + GrandPrix: Nix los?</td>
+      <td>Diskussion</td>
+      <td>https://www.reddit.com/r/stuttgart/comments/1ngsekm/brezelrace_grandprix_nix_los/</td>
+    </tr>
+    <tr>
+      <td>5</td>
+      <td>Leben in einer Dachgeschosswohnung in Stuttgart: Mein Rücken schwitzt nicht mehr!</td>
+      <td>Diskussion</td>
+      <td>https://www.reddit.com/r/stuttgart/comments/1logaug/leben_in_einer_dachgeschosswohnung_in_stuttgart/</td>
+    </tr>
+    <tr>
+      <td>5</td>
+      <td>🚋 Was haltet ihr vom alten GT4 der SSB und wie fändet ihr ein modernes Comeback?</td>
+      <td>Diskussion</td>
+      <td>https://www.reddit.com/r/stuttgart/comments/1nj2mw6/was_haltet_ihr_vom_alten_gt4_der_ssb_und_wie/</td>
+    </tr>
+    <tr>
+      <td>5</td>
+      <td>neuer "Schnell-Ladepark" Zuffenhausen der SWS</td>
+      <td>Diskussion</td>
+      <td>https://www.reddit.com/r/stuttgart/comments/1nr4f5i/neuer_schnellladepark_zuffenhausen_der_sws/</td>
+    </tr>
+    <tr>
+      <td>6</td>
+      <td>New to Germany/EU - Furniture, Mattresses, Online Stores for home furnishing</td>
+      <td>Diskussion</td>
+      <td>https://www.reddit.com/r/stuttgart/comments/1nv1s1p/new_to_germanyeu_furniture_mattresses_online/</td>
+    </tr>
+    <tr>
+      <td>6</td>
+      <td>Leerstände im Milaneo</td>
+      <td>Diskussion</td>
+      <td>https://www.reddit.com/r/stuttgart/comments/1n0vz7z/leerstände_im_milaneo/</td>
+    </tr>
+    <tr>
+      <td>6</td>
+      <td>Had a very nice doctor experience in Bad Cannstatt</td>
+      <td>Diskussion</td>
+      <td>https://www.reddit.com/r/stuttgart/comments/1nornmh/had_a_very_nice_doctor_experience_in_bad_cannstatt/</td>
+    </tr>
+    <tr>
+      <td>7</td>
+      <td>Hat die Stadtverwaltung in der Straße aufgegeben?</td>
+      <td>Diskussion</td>
+      <td>https://www.reddit.com/r/stuttgart/comments/1me6zab/hat_die_stadtverwaltung_in_der_straße_aufgegeben/</td>
+    </tr>
+    <tr>
+      <td>7</td>
+      <td>Getting sued privately or going to prison?</td>
+      <td>Diskussion</td>
+      <td>https://www.reddit.com/r/stuttgart/comments/1lgd1hq/getting_sued_privately_or_going_to_prison/</td>
+    </tr>
+    <tr>
+      <td>7</td>
+      <td>Ist es nur ein Stuttgarter Ding "verschickt" zu verrückt zu sagen? Habe gemerkt dass ich in anderen Städten wen Ich das gesagt habe nie verstanden wurde.</td>
+      <td>Diskussion</td>
+      <td>https://www.reddit.com/r/stuttgart/comments/1n93go0/ist_es_nur_ein_stuttgarter_ding_verschickt_zu/</td>
+    </tr>
+    <tr>
+      <td>8</td>
+      <td>Can I apply for Blue Card while waiting for Work Seeker Visa?</td>
+      <td>Diskussion</td>
+      <td>https://www.reddit.com/r/stuttgart/comments/1meu6xi/can_i_apply_for_blue_card_while_waiting_for_work/</td>
+    </tr>
+    <tr>
+      <td>8</td>
+      <td>Residence Permit About to Expire</td>
+      <td>Diskussion</td>
+      <td>https://www.reddit.com/r/stuttgart/comments/1nntn21/residence_permit_about_to_expire/</td>
+    </tr>
+    <tr>
+      <td>8</td>
+      <td>I just moved to Stuttgart</td>
+      <td>Diskussion</td>
+      <td>https://www.reddit.com/r/stuttgart/comments/1nj7lhu/i_just_moved_to_stuttgart/</td>
+    </tr>
+    <tr>
+      <td>9</td>
+      <td>€300-Positive-Bewertungs-Bestechung – Illegal in Deutschland?</td>
+      <td>Diskussion</td>
+      <td>https://www.reddit.com/r/stuttgart/comments/1newta5/300positivebewertungsbestechung_illegal_in/</td>
+    </tr>
+    <tr>
+      <td>9</td>
+      <td>Müllchaos in Stuttgart‑West – was stimmt mit den Leuten nicht?</td>
+      <td>Diskussion</td>
+      <td>https://www.reddit.com/r/stuttgart/comments/1lvglqn/müllchaos_in_stuttgartwest_was_stimmt_mit_den/</td>
+    </tr>
+    <tr>
+      <td>9</td>
+      <td>Ausbau der BAB81 zwischen Leonberg und Böblingen-Hulb</td>
+      <td>Diskussion</td>
+      <td>https://www.reddit.com/r/stuttgart/comments/1o0gg5k/ausbau_der_bab81_zwischen_leonberg_und/</td>
+    </tr>
+    <tr>
+      <td>10</td>
+      <td>I am prejudiced against living in Leonberg, Sindelfingen and Böblingen. Am I wrong?</td>
+      <td>Diskussion</td>
+      <td>https://www.reddit.com/r/stuttgart/comments/1mndnqe/i_am_prejudiced_against_living_in_leonberg/</td>
+    </tr>
+    <tr>
+      <td>10</td>
+      <td>Einladung zur Diskussion zum Thema: innovatives Beckenbodentraining</td>
+      <td>Diskussion</td>
+      <td>https://www.reddit.com/r/stuttgart/comments/1lihd8t/einladung_zur_diskussion_zum_thema_innovatives/</td>
+    </tr>
+    <tr>
+      <td>10</td>
+      <td>4 Days in Germany – Aalen Base, Visiting Stuttgart, Tubingen & Esslingen – Tips?</td>
+      <td>Diskussion</td>
+      <td>https://www.reddit.com/r/stuttgart/comments/1moiw0m/4_days_in_germany_aalen_base_visiting_stuttgart/</td>
+    </tr>
+  </tbody>
+</table>
+<h3>Events</h3>
+<b>TF-IDF Top-Begriffe:</b> the, and, jemand, konzert, mal, ticket, heute, gerne, zusammen, hallo, vielleicht, for
+<details><summary><b>LDA Themen</b></summary><ol><li>the, to, and, in, be, for, stuttgart, but, of, und, so, no</li><li>in, ich, the, stuttgart, und, die, oder, it, to, zu, in stuttgart, they</li><li>und, ich, ist, im, wir, uns, zu, in, für, uhr, mal, auch</li><li>in, stuttgart, und, the, die, oder, mit, festival, der, to, of, ein</li><li>wir, in, und, spielen, auf, sind, oder, am, kann, spiele, uns, wir spielen</li><li>in, ich, gerne, mit, man, stuttgart, zu, mal, für, am, der, in stuttgart</li><li>oder, ich, da, bars, enchilada, ihr, die, kennt, einen, aber, kommt, mich</li><li>die, und, ich, in, zu, auf, ein, es, konzert, noch, auch, alleine</li><li>to, the, and, on, we, or, any, it, be, for, volksfest, go</li><li>und, das, ich, die, kann, es, ist, auf, am, den, and, 25</li></ol></details>
+<b>Beispiel-Posts pro LDA-Thema:</b><table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>topic</th>
+      <th>title</th>
+      <th>flair</th>
+      <th>permalink</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>0</td>
+      <td>Finding alternative friends who speak English!!</td>
+      <td>Events</td>
+      <td>https://www.reddit.com/r/stuttgart/comments/1o0tuim/finding_alternative_friends_who_speak_english/</td>
+    </tr>
+    <tr>
+      <td>0</td>
+      <td>Heute ist es soweit: nach 6 Jahren findet das Oldtimertreffen auf der Hahnweide bei Kirchheim wieder statt</td>
+      <td>Events</td>
+      <td>https://www.reddit.com/r/stuttgart/comments/1nevi78/heute_ist_es_soweit_nach_6_jahren_findet_das/</td>
+    </tr>
+    <tr>
+      <td>0</td>
+      <td>places to see the Germany v Spain football game on Wednesday evening</td>
+      <td>Events</td>
+      <td>https://www.reddit.com/r/stuttgart/comments/1m6rlta/places_to_see_the_germany_v_spain_football_game/</td>
+    </tr>
+    <tr>
+      <td>1</td>
+      <td>Fontaines D.C. at Killesberg Park</td>
+      <td>Events</td>
+      <td>https://www.reddit.com/r/stuttgart/comments/1m1my9t/fontaines_dc_at_killesberg_park/</td>
+    </tr>
+    <tr>
+      <td>1</td>
+      <td>Fahrrad Demo in stuttgart</td>
+      <td>Events</td>
+      <td>https://www.reddit.com/r/stuttgart/comments/1nx6kzl/fahrrad_demo_in_stuttgart/</td>
+    </tr>
+    <tr>
+      <td>1</td>
+      <td>Gibt es irgendwo in Stuttgart Downtempo-Musik?</td>
+      <td>Events</td>
+      <td>https://www.reddit.com/r/stuttgart/comments/1maihzm/gibt_es_irgendwo_in_stuttgart_downtempomusik/</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>DIY Makramee-Workshop im Café NALI – Blumenampel zum selber machen + Welcome Drink!</td>
+      <td>Events</td>
+      <td>https://www.reddit.com/r/stuttgart/comments/1ntqk8p/diy_makrameeworkshop_im_café_nali_blumenampel_zum/</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>2x "One Battle after After Another" mit DiCapio, Sean Penn in der Liederhalle HEUTE 19:20 UHR for FREE :)</td>
+      <td>Events</td>
+      <td>https://www.reddit.com/r/stuttgart/comments/1nrxq58/2x_one_battle_after_after_another_mit_dicapio/</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>Spielenachmittag am Sonntag in Bad Cannstatt</td>
+      <td>Events</td>
+      <td>https://www.reddit.com/r/stuttgart/comments/1louy2f/spielenachmittag_am_sonntag_in_bad_cannstatt/</td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td>Experience Indian Cinema Authentically: The 22nd Indian Film Festival Stuttgart Kicks Off in Two Days!</td>
+      <td>Events</td>
+      <td>https://www.reddit.com/r/stuttgart/comments/1m5kpzr/experience_indian_cinema_authentically_the_22nd/</td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td>Wer geht noch alles zum CSD Stuttgart oder zum Studio Gaga Pride Festival? Lust, sich vorher zu connecten oder zusammen hinzugehen?</td>
+      <td>Events</td>
+      <td>https://www.reddit.com/r/stuttgart/comments/1m0p51j/wer_geht_noch_alles_zum_csd_stuttgart_oder_zum/</td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td>What to do in Stuttgart? Become volunteer at the Sommerfestival der Kulturen!r</td>
+      <td>Events</td>
+      <td>https://www.reddit.com/r/stuttgart/comments/1ldfep6/what_to_do_in_stuttgart_become_volunteer_at_the/</td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td>Spielenachmittag in Bad Cannstatt am Sonntag, 7.9. 15 Uhr</td>
+      <td>Events</td>
+      <td>https://www.reddit.com/r/stuttgart/comments/1n4xtk0/spielenachmittag_in_bad_cannstatt_am_sonntag_79/</td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td>Ed Sheran / Parken MHP Arena</td>
+      <td>Events</td>
+      <td>https://www.reddit.com/r/stuttgart/comments/1lnaeqa/ed_sheran_parken_mhp_arena/</td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td>Spielenachmittag in Bad Cannstatt am Sonntag🎲Wir haben noch Plätze frei😊</td>
+      <td>Events</td>
+      <td>https://www.reddit.com/r/stuttgart/comments/1nqvfps/spielenachmittag_in_bad_cannstatt_am_sonntagwir/</td>
+    </tr>
+    <tr>
+      <td>5</td>
+      <td>Teamevent in Vaihingen</td>
+      <td>Events</td>
+      <td>https://www.reddit.com/r/stuttgart/comments/1lf3g49/teamevent_in_vaihingen/</td>
+    </tr>
+    <tr>
+      <td>5</td>
+      <td>Begleitung Konzert in Stuttgart am 12.10.</td>
+      <td>Events</td>
+      <td>https://www.reddit.com/r/stuttgart/comments/1npfzmp/begleitung_konzert_in_stuttgart_am_1210/</td>
+    </tr>
+    <tr>
+      <td>5</td>
+      <td>Was tun in Stuttgart</td>
+      <td>Events</td>
+      <td>https://www.reddit.com/r/stuttgart/comments/1m5dzzr/was_tun_in_stuttgart/</td>
+    </tr>
+    <tr>
+      <td>6</td>
+      <td>Bars in Stuttgart unter der Woche</td>
+      <td>Events</td>
+      <td>https://www.reddit.com/r/stuttgart/comments/1ny6t0z/bars_in_stuttgart_unter_der_woche/</td>
+    </tr>
+    <tr>
+      <td>7</td>
+      <td>Silvestermenü</td>
+      <td>Events</td>
+      <td>https://www.reddit.com/r/stuttgart/comments/1nv8i8q/silvestermenü/</td>
+    </tr>
+    <tr>
+      <td>7</td>
+      <td>Cannstatter Volksfest Padiglioni</td>
+      <td>Events</td>
+      <td>https://www.reddit.com/r/stuttgart/comments/1nkurcs/cannstatter_volksfest_padiglioni/</td>
+    </tr>
+    <tr>
+      <td>7</td>
+      <td>Alleine heute ins Wizemann?</td>
+      <td>Events</td>
+      <td>https://www.reddit.com/r/stuttgart/comments/1o8y7av/alleine_heute_ins_wizemann/</td>
+    </tr>
+    <tr>
+      <td>8</td>
+      <td>Cannstatter first time advice</td>
+      <td>Events</td>
+      <td>https://www.reddit.com/r/stuttgart/comments/1lzjpnt/cannstatter_first_time_advice/</td>
+    </tr>
+    <tr>
+      <td>8</td>
+      <td>Cannstatter volksfest Saturday 27th</td>
+      <td>Events</td>
+      <td>https://www.reddit.com/r/stuttgart/comments/1nbr2ds/cannstatter_volksfest_saturday_27th/</td>
+    </tr>
+    <tr>
+      <td>8</td>
+      <td>Two Canadians at Cannstatter Volksfest, what do we do??</td>
+      <td>Events</td>
+      <td>https://www.reddit.com/r/stuttgart/comments/1nzmil4/two_canadians_at_cannstatter_volksfest_what_do_we/</td>
+    </tr>
+    <tr>
+      <td>9</td>
+      <td>Tipp: OTT am Wochenende</td>
+      <td>Events</td>
+      <td>https://www.reddit.com/r/stuttgart/comments/1nf5lpg/tipp_ott_am_wochenende/</td>
+    </tr>
+    <tr>
+      <td>9</td>
+      <td>Pendulum Ticket abzugeben am 25.10.</td>
+      <td>Events</td>
+      <td>https://www.reddit.com/r/stuttgart/comments/1o6bt4w/pendulum_ticket_abzugeben_am_2510/</td>
+    </tr>
+    <tr>
+      <td>9</td>
+      <td>Neckar-Insel Initiative</td>
+      <td>Events</td>
+      <td>https://www.reddit.com/r/stuttgart/comments/1n5zdwh/neckarinsel_initiative/</td>
+    </tr>
+  </tbody>
+</table>
+<h3>Frage / Advice</h3>
+<b>TF-IDF Top-Begriffe:</b> the, and, for, jemand, have, with, that, this, any, you, but, hallo
+<details><summary><b>LDA Themen</b></summary><ol><li>in, stuttgart, ich, der, oder, und, es, in stuttgart, was, die, bin, wo</li><li>ich, und, der, in, die, ist, ein, stuttgart, das, mit, eine, da</li><li>to, it, have, and, stuttgart, but, really, my, are, for, is, this</li><li>ich, in, und, der, stuttgart, oder, ist, man, mit, eine, kann, für</li><li>in, to, the, and, stuttgart, for, my, is, in stuttgart, with, it, of</li><li>the, to, and, in, for, is, my, of, it, stuttgart, on, that</li><li>to, the, in, and, for, stuttgart, it, we, my, you, or, have</li><li>in, stuttgart, und, ich, was, die, im, jemand, das, der, erfahrungen, bahn</li><li>ich, und, der, die, es, ist, in, nicht, zu, für, mit, man</li></ol></details>
+<b>Beispiel-Posts pro LDA-Thema:</b><table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>topic</th>
+      <th>title</th>
+      <th>flair</th>
+      <th>permalink</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>0</td>
+      <td>Guter Orthopäde/ Sportmediziner Raum Stuttgart</td>
+      <td>Frage / Advice</td>
+      <td>https://www.reddit.com/r/stuttgart/comments/1lenhwu/guter_orthopäde_sportmediziner_raum_stuttgart/</td>
+    </tr>
+    <tr>
+      <td>0</td>
+      <td>Jam-sessions / gemeinsam Singen 🫨?</td>
+      <td>Frage / Advice</td>
+      <td>https://www.reddit.com/r/stuttgart/comments/1o6qlga/jamsessions_gemeinsam_singen/</td>
+    </tr>
+    <tr>
+      <td>0</td>
+      <td>Endokrinologe Stuttgart</td>
+      <td>Frage / Advice</td>
+      <td>https://www.reddit.com/r/stuttgart/comments/1mtgftr/endokrinologe_stuttgart/</td>
+    </tr>
+    <tr>
+      <td>1</td>
+      <td>Hausarzt will mich nicht mehr krankschreiben</td>
+      <td>Frage / Advice</td>
+      <td>https://www.reddit.com/r/stuttgart/comments/1ngwr35/hausarzt_will_mich_nicht_mehr_krankschreiben/</td>
+    </tr>
+    <tr>
+      <td>1</td>
+      <td>Erfahrungen mit einem Anglistik Studium an der Uni Stuttgart?</td>
+      <td>Frage / Advice</td>
+      <td>https://www.reddit.com/r/stuttgart/comments/1myyr7n/erfahrungen_mit_einem_anglistik_studium_an_der/</td>
+    </tr>
+    <tr>
+      <td>1</td>
+      <td>Stadtbahnen blockieren Kreuzungen</td>
+      <td>Frage / Advice</td>
+      <td>https://www.reddit.com/r/stuttgart/comments/1o6muo0/stadtbahnen_blockieren_kreuzungen/</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>Really really really  need accommodation</td>
+      <td>Frage / Advice</td>
+      <td>https://www.reddit.com/r/stuttgart/comments/1nvn6hj/really_really_really_need_accommodation/</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>Defizitbescheid from Regierungspräsidium Stuttgart</td>
+      <td>Frage / Advice</td>
+      <td>https://www.reddit.com/r/stuttgart/comments/1norlwi/defizitbescheid_from_regierungspräsidium_stuttgart/</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>Queries regarding PolyGo Card?</td>
+      <td>Frage / Advice</td>
+      <td>https://www.reddit.com/r/stuttgart/comments/1loxgt1/queries_regarding_polygo_card/</td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td>Uni Hohenheim Master</td>
+      <td>Frage / Advice</td>
+      <td>https://www.reddit.com/r/stuttgart/comments/1lzm0dm/uni_hohenheim_master/</td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td>Stuttgart belebte Stadt ?</td>
+      <td>Frage / Advice</td>
+      <td>https://www.reddit.com/r/stuttgart/comments/1nq3d88/stuttgart_belebte_stadt/</td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td>Mhp Arena Parken</td>
+      <td>Frage / Advice</td>
+      <td>https://www.reddit.com/r/stuttgart/comments/1ld0upo/mhp_arena_parken/</td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td>Landlord is making my life miserable and is now trying to evict me in 7 days.</td>
+      <td>Frage / Advice</td>
+      <td>https://www.reddit.com/r/stuttgart/comments/1nmzvc9/landlord_is_making_my_life_miserable_and_is_now/</td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td>Switching visa status at the Stuttgart ABH : Any recommended migrant lawyers?</td>
+      <td>Frage / Advice</td>
+      <td>https://www.reddit.com/r/stuttgart/comments/1nk1egf/switching_visa_status_at_the_stuttgart_abh_any/</td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td>Looking for Accommodation and banking help (New to the city)</td>
+      <td>Frage / Advice</td>
+      <td>https://www.reddit.com/r/stuttgart/comments/1mbe36y/looking_for_accommodation_and_banking_help_new_to/</td>
+    </tr>
+    <tr>
+      <td>5</td>
+      <td>Passport of student seized because of incompetent Stuttgart Foreigners’ Office. (Marked as schwarzarbeit). What can be done?</td>
+      <td>Frage / Advice</td>
+      <td>https://www.reddit.com/r/stuttgart/comments/1nu81ff/passport_of_student_seized_because_of_incompetent/</td>
+    </tr>
+    <tr>
+      <td>5</td>
+      <td>Advice regarding Ausländerbehörde Delays</td>
+      <td>Frage / Advice</td>
+      <td>https://www.reddit.com/r/stuttgart/comments/1lk57t5/advice_regarding_ausländerbehörde_delays/</td>
+    </tr>
+    <tr>
+      <td>5</td>
+      <td>Advice: Van rental company refusing to return my caution fee</td>
+      <td>Frage / Advice</td>
+      <td>https://www.reddit.com/r/stuttgart/comments/1l7rz6d/advice_van_rental_company_refusing_to_return_my/</td>
+    </tr>
+    <tr>
+      <td>6</td>
+      <td>Hedelfingen - a good neighborhood for Expats?</td>
+      <td>Frage / Advice</td>
+      <td>https://www.reddit.com/r/stuttgart/comments/1mrqxr4/hedelfingen_a_good_neighborhood_for_expats/</td>
+    </tr>
+    <tr>
+      <td>6</td>
+      <td>Looking for accommodation in Stuttgart || at our wits end</td>
+      <td>Frage / Advice</td>
+      <td>https://www.reddit.com/r/stuttgart/comments/1mbvimc/looking_for_accommodation_in_stuttgart_at_our/</td>
+    </tr>
+    <tr>
+      <td>6</td>
+      <td>Need Recommendations for My Quick Visit to Stuttgart</td>
+      <td>Frage / Advice</td>
+      <td>https://www.reddit.com/r/stuttgart/comments/1npysee/need_recommendations_for_my_quick_visit_to/</td>
+    </tr>
+    <tr>
+      <td>7</td>
+      <td>Mercedes Benz Busse (Öffis): dreieckige Signallampe</td>
+      <td>Frage / Advice</td>
+      <td>https://www.reddit.com/r/stuttgart/comments/1n8y2d5/mercedes_benz_busse_öffis_dreieckige_signallampe/</td>
+    </tr>
+    <tr>
+      <td>7</td>
+      <td>Stromausfall</td>
+      <td>Frage / Advice</td>
+      <td>https://www.reddit.com/r/stuttgart/comments/1nnfdtb/stromausfall/</td>
+    </tr>
+    <tr>
+      <td>7</td>
+      <td>Hubschrauber in Vaihingen</td>
+      <td>Frage / Advice</td>
+      <td>https://www.reddit.com/r/stuttgart/comments/1ldy9jl/hubschrauber_in_vaihingen/</td>
+    </tr>
+    <tr>
+      <td>8</td>
+      <td>Führerscheinstelle Stuttgart - Gibt es Tipps?</td>
+      <td>Frage / Advice</td>
+      <td>https://www.reddit.com/r/stuttgart/comments/1lkvvvn/führerscheinstelle_stuttgart_gibt_es_tipps/</td>
+    </tr>
+    <tr>
+      <td>8</td>
+      <td>Telekom Glasfaser Nervensägen</td>
+      <td>Frage / Advice</td>
+      <td>https://www.reddit.com/r/stuttgart/comments/1nw1pek/telekom_glasfaser_nervensägen/</td>
+    </tr>
+    <tr>
+      <td>8</td>
+      <td>Was ist das seltsame Objekt von 1592?</td>
+      <td>Frage / Advice</td>
+      <td>https://www.reddit.com/r/stuttgart/comments/1nsjjeo/was_ist_das_seltsame_objekt_von_1592/</td>
+    </tr>
+  </tbody>
+</table>
+<h3>Looking for...</h3>
+<b>TF-IDF Top-Begriffe:</b> for, and, the, jemand, suche, any, looking, you, gerne, that, hallo, can
+<details><summary><b>LDA Themen</b></summary><ol><li>und, ich, in, stuttgart, der, die, für, in stuttgart, wir, auch, es, sind</li><li>ich, in, the, und, to, die, we, stuttgart, oder, es, ist, mir</li><li>ich, und, in, die, der, zu, bin, nicht, stuttgart, auch, es, sind</li><li>in, ich, kann, und, stuttgart, der, in stuttgart, jemand, oder, man, es, nach</li><li>to, in, for, and, stuttgart, the, or, you, looking, in stuttgart, any, of</li><li>in, stuttgart, ich, und, in stuttgart, der, oder, suche, für, mit, auch, die</li><li>to, in, and, for, any, or, stuttgart, the, that, in stuttgart, looking, you</li><li>ich, und, in, die, der, für, stuttgart, oder, ein, nicht, in stuttgart, suche</li></ol></details>
+<b>Beispiel-Posts pro LDA-Thema:</b><table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>topic</th>
+      <th>title</th>
+      <th>flair</th>
+      <th>permalink</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>0</td>
+      <td>Suchen Mitglieder für eine Metal Band</td>
+      <td>Looking for...</td>
+      <td>https://www.reddit.com/r/stuttgart/comments/1ls5kzc/suchen_mitglieder_für_eine_metal_band/</td>
+    </tr>
+    <tr>
+      <td>0</td>
+      <td>Möglichkeiten sich einzubringen</td>
+      <td>Looking for...</td>
+      <td>https://www.reddit.com/r/stuttgart/comments/1nfgudn/möglichkeiten_sich_einzubringen/</td>
+    </tr>
+    <tr>
+      <td>0</td>
+      <td>Wie wirkt sich der Stellenabbau auf Stuttgart aus?</td>
+      <td>Looking for...</td>
+      <td>https://www.reddit.com/r/stuttgart/comments/1nq6rv8/wie_wirkt_sich_der_stellenabbau_auf_stuttgart_aus/</td>
+    </tr>
+    <tr>
+      <td>1</td>
+      <td>hotel/ luggage/ train advice - one day trip to Stuttgart to visit Porsche and Mercedes</td>
+      <td>Looking for...</td>
+      <td>https://www.reddit.com/r/stuttgart/comments/1o067hw/hotel_luggage_train_advice_one_day_trip_to/</td>
+    </tr>
+    <tr>
+      <td>1</td>
+      <td>Gym-Buddy gesucht</td>
+      <td>Looking for...</td>
+      <td>https://www.reddit.com/r/stuttgart/comments/1nezxi6/gymbuddy_gesucht/</td>
+    </tr>
+    <tr>
+      <td>1</td>
+      <td>Lost Drive / Verlorene Festplatte</td>
+      <td>Looking for...</td>
+      <td>https://www.reddit.com/r/stuttgart/comments/1m9a4l3/lost_drive_verlorene_festplatte/</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>Stuttgart neu entdecken</td>
+      <td>Looking for...</td>
+      <td>https://www.reddit.com/r/stuttgart/comments/1o8h3qx/stuttgart_neu_entdecken/</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>Guter, günstiger Cappuccino Nähe Charlottenplatz/Rathaus?</td>
+      <td>Looking for...</td>
+      <td>https://www.reddit.com/r/stuttgart/comments/1m5bod2/guter_günstiger_cappuccino_nähe/</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>Suche nach Männerfrisör</td>
+      <td>Looking for...</td>
+      <td>https://www.reddit.com/r/stuttgart/comments/1ngqiq1/suche_nach_männerfrisör/</td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td>Stretch Zelt Verleih</td>
+      <td>Looking for...</td>
+      <td>https://www.reddit.com/r/stuttgart/comments/1nnhl8g/stretch_zelt_verleih/</td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td>Wichtiges Stofftier in Bad Cannstatt verloren.</td>
+      <td>Looking for...</td>
+      <td>https://www.reddit.com/r/stuttgart/comments/1mnlwc2/wichtiges_stofftier_in_bad_cannstatt_verloren/</td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td>OV Kino in Stuttgart</td>
+      <td>Looking for...</td>
+      <td>https://www.reddit.com/r/stuttgart/comments/1ne9f1w/ov_kino_in_stuttgart/</td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td>One more Intern in Stuttgart: New City, Same Awkward Attempts at Making Friends</td>
+      <td>Looking for...</td>
+      <td>https://www.reddit.com/r/stuttgart/comments/1lj7s94/one_more_intern_in_stuttgart_new_city_same/</td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td>New Kid in Stuttgart</td>
+      <td>Looking for...</td>
+      <td>https://www.reddit.com/r/stuttgart/comments/1lb2xc3/new_kid_in_stuttgart/</td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td>Birthday date ideas!</td>
+      <td>Looking for...</td>
+      <td>https://www.reddit.com/r/stuttgart/comments/1lt4gma/birthday_date_ideas/</td>
+    </tr>
+    <tr>
+      <td>5</td>
+      <td>Führerschein mit Angststörung, Suche eine geduldige:n Fahrlehrer:in</td>
+      <td>Looking for...</td>
+      <td>https://www.reddit.com/r/stuttgart/comments/1lfyyvo/führerschein_mit_angststörung_suche_eine/</td>
+    </tr>
+    <tr>
+      <td>5</td>
+      <td>Abkühlen in Stuttgart?</td>
+      <td>Looking for...</td>
+      <td>https://www.reddit.com/r/stuttgart/comments/1l9ooym/abkühlen_in_stuttgart/</td>
+    </tr>
+    <tr>
+      <td>5</td>
+      <td>Suche dringend guten Anwalt in Stuttgart (Zivilrecht, Schadenersatz, Krankenhaus-/Pflegekosten)</td>
+      <td>Looking for...</td>
+      <td>https://www.reddit.com/r/stuttgart/comments/1moxnie/suche_dringend_guten_anwalt_in_stuttgart/</td>
+    </tr>
+    <tr>
+      <td>6</td>
+      <td>Looking for part-time or warehouse job in Stuttgart — any leads or advice? 🙏</td>
+      <td>Looking for...</td>
+      <td>https://www.reddit.com/r/stuttgart/comments/1o47ku2/looking_for_parttime_or_warehouse_job_in/</td>
+    </tr>
+    <tr>
+      <td>6</td>
+      <td>I’m planning to stay in Stuttgart for about a week and would love some local advice. Do you have any recommendations on which areas are good to stay in, or places I should maybe avoid?</td>
+      <td>Looking for...</td>
+      <td>https://www.reddit.com/r/stuttgart/comments/1o86glp/im_planning_to_stay_in_stuttgart_for_about_a_week/</td>
+    </tr>
+    <tr>
+      <td>6</td>
+      <td>Just Moved to Stuttgart, Hoping to Meet Like-Minded People</td>
+      <td>Looking for...</td>
+      <td>https://www.reddit.com/r/stuttgart/comments/1o7eefq/just_moved_to_stuttgart_hoping_to_meet_likeminded/</td>
+    </tr>
+    <tr>
+      <td>7</td>
+      <td>Verschwundener Fußweg im Fahrplan</td>
+      <td>Looking for...</td>
+      <td>https://www.reddit.com/r/stuttgart/comments/1nphvao/verschwundener_fußweg_im_fahrplan/</td>
+    </tr>
+    <tr>
+      <td>7</td>
+      <td>Hundepension gesucht</td>
+      <td>Looking for...</td>
+      <td>https://www.reddit.com/r/stuttgart/comments/1mtdu3k/hundepension_gesucht/</td>
+    </tr>
+    <tr>
+      <td>7</td>
+      <td>Einen halben Tag nur Zeit - Was tun?</td>
+      <td>Looking for...</td>
+      <td>https://www.reddit.com/r/stuttgart/comments/1nmbilw/einen_halben_tag_nur_zeit_was_tun/</td>
+    </tr>
+  </tbody>
+</table>
+<h3>News</h3>
+<b>TF-IDF Top-Begriffe:</b> jemand, weiß, heute, weiß jemand, gesperrt, los, ost, polizei, platz, the, jähriger, people
+<h3>Sonstiges</h3>
+<b>TF-IDF Top-Begriffe:</b> the, from, you, greetings from, greetings, this, and, heute, ost, mehr, neue, one

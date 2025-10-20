@@ -1,8 +1,6 @@
 praw
+python-dotenv
 pandas
 numpy
 scikit-learn
 nltk
-matplotlib
-tqdm
-python-dotenv
