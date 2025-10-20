@@ -1,0 +1,5 @@
+.DS_STORE
+.venv
+.env
+__pycache__
+.html
