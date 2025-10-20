@@ -2,10 +2,44 @@ import os
 import argparse
 from datetime import datetime, timedelta, timezone
 from typing import Dict
-from src.preprocess import tokenize
 
 import numpy as np
 import pandas as pd
+
+try:
+    from src.fetch import fetch_subreddit_posts
+    from src.preprocess import (
+        attach_norm_hash,
+        drop_duplicates_by_hash,
+        heuristic_spam_mask,
+        clean_text,
+        tokenize,
+    )
+    from src.topics import fit_lda_with_k, terms_for_topics, lsa_top_terms
+    from src.utils import (
+        top_flairs,
+        top_users,
+        tfidf_top_terms_per_flair,
+        sample_docs_for_topics,
+    )
+except ImportError:
+    import sys, os
+    sys.path.append(os.path.join(ROOT, "src"))
+    from fetch import fetch_subreddit_posts
+    from preprocess import (
+        attach_norm_hash,
+        drop_duplicates_by_hash,
+        heuristic_spam_mask,
+        clean_text,
+        tokenize,  # <-- wichtig
+    )
+    from topics import fit_lda_with_k, terms_for_topics, lsa_top_terms
+    from utils import (
+        top_flairs,
+        top_users,
+        tfidf_top_terms_per_flair,
+        sample_docs_for_topics,
+    )
 
 # Paket-Import mit Fallback
 HERE = os.path.dirname(__file__) if "__file__" in globals() else os.getcwd()
@@ -15,36 +49,13 @@ DATADIR = os.path.join(ROOT, "data")
 os.makedirs(OUTDIR, exist_ok=True)
 os.makedirs(DATADIR, exist_ok=True)
 
-try:
-    from src.fetch import fetch_subreddit_posts
-    from src.preprocess import (
-        attach_norm_hash,
-        drop_duplicates_by_hash,
-        heuristic_spam_mask,
-        clean_text,
-    )
-    from src.topics import fit_lda_with_k, terms_for_topics, lsa_top_terms
-    from src.utils import top_flairs, top_users, tfidf_top_terms_per_flair, sample_docs_for_topics
-except ImportError:
-    import sys
-    sys.path.append(os.path.join(ROOT, "src"))
-    from fetch import fetch_subreddit_posts
-    from preprocess import (
-        attach_norm_hash,
-        drop_duplicates_by_hash,
-        heuristic_spam_mask,
-        clean_text,
-    )
-    from topics import fit_lda_with_k, terms_for_topics, lsa_top_terms
-    from utils import top_flairs, top_users, tfidf_top_terms_per_flair, sample_docs_for_topics
-
-
 # ---------- Rendering ----------
 def _html_escape(s: str) -> str:
     return (s or "").replace("&","&amp;").replace("<","&lt;").replace(">","&gt;")
 
 def render_html_report(meta: Dict, flair_stats: pd.DataFrame, user_stats: pd.DataFrame,
                        per_flair: Dict, global_block: Dict, method_text: str, ethics_text: str) -> str:
+    """Baut einfachen HTML Report"""
     def df_to_html(df: pd.DataFrame) -> str:
         if df is None or df.empty:
             return "<i>n/a</i>"
@@ -53,10 +64,11 @@ def render_html_report(meta: Dict, flair_stats: pd.DataFrame, user_stats: pd.Dat
     parts.append(f"<h1>/r/Stuttgart – Themenanalyse</h1>")
     parts.append(f"<p><b>Dokument erstellt:</b> {datetime.now().strftime('%Y-%m-%d %H:%M')}</p>")
 
+    # Meta/Methodik & Ethik Hinweis
     parts.append(f"<h2>Meta</h2><ul><li>Dokumente: {meta.get('n_docs')}</li><li>Flairs: {meta.get('n_flairs')}</li></ul>")
     parts.append(f"<h2>Methodik (Kurz)</h2><div style='white-space:pre-wrap'>{_html_escape(method_text)}</div>")
     parts.append(f"<h2>Ethik & Nutzung</h2><div style='white-space:pre-wrap'>{_html_escape(ethics_text)}</div>")
-
+    # Überblicks‑Statistiken
     parts.append("<h2>Top Flairs</h2>" + df_to_html(flair_stats))
     parts.append("<h2>Aktivste Nutzer</h2>" + df_to_html(user_stats))
 
@@ -67,7 +79,7 @@ def render_html_report(meta: Dict, flair_stats: pd.DataFrame, user_stats: pd.Dat
     if global_block.get("lsa_terms"):
         parts.append("<h3>LSA (Vergleich)</h3><ol>" + "".join(["<li>" + ", ".join([_html_escape(w) for w,_ in t]) + "</li>" for t in global_block["lsa_terms"]]) + "</ol>")
 
-    # Pro Flair
+    # Flair‑spezifische Blöcke 
     parts.append("<hr><h2>Pro Flair</h2>")
     for flair, blk in per_flair.items():
         parts.append(f"<h3>{_html_escape(str(flair if flair else '(ohne Flair)'))}</h3>")
@@ -85,6 +97,7 @@ def render_html_report(meta: Dict, flair_stats: pd.DataFrame, user_stats: pd.Dat
 
 # ---------- Pipeline helpers ----------
 def prepare_text_columns(df_posts: pd.DataFrame, df_comments: pd.DataFrame, include_comments: bool) -> pd.DataFrame:
+    """Führt Titel, Body und (optional) aggregierte Kommentare je Post zu `text_all` zusammen"""
     df = df_posts.copy()
     df["comments_text"] = ""
     if include_comments and not df_comments.empty:
@@ -95,6 +108,7 @@ def prepare_text_columns(df_posts: pd.DataFrame, df_comments: pd.DataFrame, incl
     return df
 
 def apply_quality_filters(df: pd.DataFrame) -> pd.DataFrame:
+    """Duplikate + einfache Spam‑Heuristik anwenden und Effekte protokollieren"""
     df = attach_norm_hash(df, title_col="title", text_col="selftext")
     df, n_dups = drop_duplicates_by_hash(df)
     print(f"[Quality] Removed duplicates: {n_dups}")
@@ -105,6 +119,7 @@ def apply_quality_filters(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 def build_method_text(metric_used: str, k_diag_global: Dict[int, float], min_docs_per_flair: int, start: str, end: str) -> str:
+    """Verwendete Methodik"""
     lines = [
         f"Zeitraum: {start} bis {end}",
         "Vorverarbeitung: Bereinigung (Kleinbuchstaben, URLs entfernen), Tokenisierung, Stoppwörter (NLTK/fallback), N-Gramme (1–2).",
@@ -121,6 +136,7 @@ def build_method_text(metric_used: str, k_diag_global: Dict[int, float], min_doc
     return "\n".join(lines)
 
 def build_ethics_text() -> str:
+    """Kurztext zur ethischen Nutzung (nur öffentliche Inhalte, keine Profilbildung etc.)"""
     return (
         "• Ausschließlich öffentliche Inhalte (Reddit-Beiträge/Kommentare) werden verarbeitet.\n"
         "• Keine Profilbildung, keine personenbezogene Auswertung; Ergebnisse sind aggregiert (Flairs, Themen, Top-Begriffe).\n"
@@ -137,6 +153,7 @@ def main():
     default_start = (today - timedelta(days=365)).isoformat()
     default_end = today.isoformat()
 
+    # CLI‑Parameter, siehe README
     parser.add_argument("--subreddit", default="stuttgart")
     parser.add_argument("--start", default=default_start, help="Startdatum YYYY-MM-DD (inkl., UTC)")
     parser.add_argument("--end", default=default_end, help="Enddatum YYYY-MM-DD (exkl., UTC)")
@@ -148,6 +165,7 @@ def main():
     parser.add_argument("--kmax", type=int, default=15)
     args = parser.parse_args()
 
+    # 1) Daten holen (Posts + optional Kommentare)
     fetched = fetch_subreddit_posts(
         subreddit=args.subreddit,
         start=args.start,
@@ -163,18 +181,19 @@ def main():
     if df_posts.empty:
         raise SystemExit("Keine Beiträge im angegebenen Zeitraum gefunden.")
 
-    # Rohdaten speichern
+    # 2) Rohdaten persistieren (Reproduzierbarkeit)    
     df_posts.to_csv(os.path.join(DATADIR, f"raw_r_{args.subreddit}_posts.csv"), index=False)
     df_comments.to_csv(os.path.join(DATADIR, f"raw_r_{args.subreddit}_comments.csv"), index=False)
 
+    # 3) Texte zusammenführen & Qualität filtern    
     df = prepare_text_columns(df_posts, df_comments, include_comments=args.include_comments)
     df = apply_quality_filters(df)
 
-    # Stats
+    # 4) Basis‑Statistiken für den Report
     flair_stats = top_flairs(df)
     user_stats = top_users(df)
 
-    # GLOBAL LDA (k via c_v wenn möglich, sonst Log-Likelihood)
+    # 5) Globale LDA‑Modellierung inkl. k‑Suche (Coherence c_v, Fallback Log‑Likelihood)
     texts_tok = df["text_all"].map(lambda s: tokenize(s)).tolist()
     texts_joined = [" ".join(toks) for toks in texts_tok]
 
@@ -183,16 +202,10 @@ def main():
     )
     lda_terms_global = terms_for_topics(lda, v_count, topn=12)
 
-    # LSA (robust; wird ggf. ausgelassen)
-    try:
-        from src.topics import lsa_top_terms as _lsa_top_terms
-    except ImportError:
-        from topics import lsa_top_terms as _lsa_top_terms
+    # 6) LSA als optionaler Vergleich (wird ausgelassen, wenn Daten ungeeignet)
+    lsa_terms_global = lsa_top_terms(texts_joined, requested_topics=min(8, max(6, best_k)), topn=12)
 
-    lsa_terms_global = _lsa_top_terms(texts_joined, requested_topics=min(8, max(6, best_k)), topn=12)
-
-
-    # Pro Flair
+    # 7) Pro‑Flair‑Blöcke (nur eigenes LDA, wenn genügend Dokumente vorliegen)
     per_flair = {}
     tfidf_terms_map = tfidf_top_terms_per_flair(df)
     for flair, grp in df.groupby("flair_text"):
@@ -200,7 +213,7 @@ def main():
         blk = {}
         blk["tfidf_terms"] = tfidf_terms_map.get(flair_name, [])
         if len(grp) >= args.min_docs_per_flair:
-            tok = grp["text_all"].map(lambda s: [t for t in clean_text(s).split() if t]).tolist()
+            tok = grp["text_all"].map(tokenize).tolist()
             joined = [" ".join(t) for t in tok]
             lda_f, v_c_f, X_c_f, best_k_f, _, _ = fit_lda_with_k(
                 tok, joined, k_range=range(args.kmin, args.kmax + 1), topn=12
@@ -220,6 +233,7 @@ def main():
             blk["samples_df"] = pd.DataFrame()
         per_flair[flair_name] = blk
 
+    # 8) Report schreiben (+ CSV für Statistiken)
     global_block = {"lda_terms": lda_terms_global, "lsa_terms": lsa_terms_global}
     meta = {"n_docs": int(len(df)), "n_flairs": int(df["flair_text"].nunique())}
 

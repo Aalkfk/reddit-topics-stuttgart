@@ -16,6 +16,7 @@ except Exception:
 
 
 # -------- Vektorisierung --------
+# N‑Gramme (1–2) wie im Konzept, begrenzte Featurezahl für Stabilität/Performance.
 def vectorize_count(texts: List[str], max_features: int = 20000, ngram_range=(1, 2)) -> Tuple[CountVectorizer, np.ndarray]:
     v = CountVectorizer(max_features=max_features, ngram_range=ngram_range)
     X = v.fit_transform(texts)
@@ -28,6 +29,7 @@ def vectorize_tfidf(texts: List[str], max_features: int = 20000, ngram_range=(1,
 
 
 # -------- k-Auswahl: bevorzugt c_v (gensim), sonst Log-Likelihood --------
+# c_v bewertet semantische Kohärenz von Top‑Terms je Topic; Log‑Likelihood als fallbac
 def _coherence_c_v(texts_tok: List[List[str]], topics_terms: List[List[str]]) -> float:
     """Berechnet c_v Coherence. Erwartet Tokenlisten und Topic-Term-Listen."""
     if not _HAS_GENSIM:
@@ -94,6 +96,7 @@ def fit_lda_with_k(
     k_range: range = range(6, 13),
     topn: int = 12,
 ):
+    """Hilfsfunktion: Vektorisieren, k selektieren, finales LDA mit `best_k` fitten"""
     v_count, X_count = vectorize_count(texts_joined)
     best_k, diag, metric = select_k(texts_tok, v_count, X_count, k_range=k_range, topn=topn)
     lda = LatentDirichletAllocation(n_components=best_k, random_state=42, learning_method="batch")
@@ -101,6 +104,7 @@ def fit_lda_with_k(
     return lda, v_count, X_count, best_k, diag, metric
 
 def terms_for_topics(lda: LatentDirichletAllocation, v_count: CountVectorizer, topn: int = 12):
+    """Liefert Top‑Terms je Topic inkl. Gewichten für die Darstellung im Report"""
     terms = v_count.get_feature_names_out()
     topics = []
     for i in range(lda.n_components):
@@ -110,7 +114,8 @@ def terms_for_topics(lda: LatentDirichletAllocation, v_count: CountVectorizer, t
     return topics
 
 
-# -------- LSA stabil & warnungsfrei --------
+# -------- LSA stabil ----
+# Wird stillschweigend übersprungen, wenn  Matrixzu dünn, zu klein, …
 def lsa_top_terms(texts: List[str], requested_topics: int = 8, topn: int = 12):
     """Optionale LSA (Konzept). Läuft nur, wenn Matrix „gesund“ ist; sonst sauber überspringen."""
     if not texts or all(not (t and t.strip()) for t in texts):
@@ -119,7 +124,7 @@ def lsa_top_terms(texts: List[str], requested_topics: int = 8, topn: int = 12):
     v_tfidf, X_tfidf = vectorize_tfidf(texts)
     n_samples, n_features = X_tfidf.shape
 
-    # Grundchecks
+    # Mindestanforderungen: genug Samples/Features + keine Nullmatrix
     if n_samples < 2 or n_features < 2 or X_tfidf.nnz == 0:
         return []
 

@@ -1,6 +1,3 @@
-# /src/utils.py
-# Purpose: helpers for stats and sampling
-# ==========================================================
 from typing import Dict, List, Tuple
 import numpy as np
 import pandas as pd
@@ -10,14 +7,21 @@ from .preprocess import tokenize
 from sklearn.feature_extraction.text import TfidfVectorizer
 
 def top_flairs(df_posts: pd.DataFrame, topn: int = 20) -> pd.DataFrame:
+    """Zählt Flairs (NaN -> "(ohne Flair)") und gibt Top‑N als DataFrame zurück"""
     vc = df_posts["flair_text"].fillna("(ohne Flair)").value_counts().head(topn)
     return vc.rename_axis("flair").reset_index(name="count")
 
 def top_users(df_posts: pd.DataFrame, topn: int = 20) -> pd.DataFrame:
+    """Zählt Beiträge pro Autor. Pseudonyme werden nicht weiter profiliert; nur Häufigkeit
+    Offene Optimierung: Bereinigen der Deleted User, da Übersicht verfälschen (Deleted = nicht eindeutig zuordenbar)
+    """
     vc = df_posts["author"].fillna("[unknown]").value_counts().head(topn)
     return vc.rename_axis("author").reset_index(name="count")
 
 def tfidf_top_terms_per_flair(df: pd.DataFrame, flair_col: str = "flair_text", text_col: str = "text_all", topn_terms: int = 12, max_features: int = 20000):
+    """Ermittelt je Flair die häufigsten TF‑IDF‑Termini (Unigramme/Bigramme)
+    Hinweis: Nutzt `tokenize` (derzeit DE‑fokussiert; EN = In P3/Optimierung)
+    """
     out = {}
     for flair, grp in df.groupby(flair_col):
         if len(grp) < 3:
@@ -31,6 +35,9 @@ def tfidf_top_terms_per_flair(df: pd.DataFrame, flair_col: str = "flair_text", t
     return out
 
 def sample_docs_for_topics(df: pd.DataFrame, doc_topic: np.ndarray, topics: np.ndarray, top_k: int = 5) -> pd.DataFrame:
+    """Wählt pro Topic die `top_k` Dokumente anhand der Topic‑Wahrscheinlichkeit
+    Praktisch für stichprobenartige Prüfung der Themenzuordnung
+    """
     rows = []
     for t in range(doc_topic.shape[1]):
         idx = np.where(topics == t)[0]
