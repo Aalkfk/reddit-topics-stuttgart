@@ -49,7 +49,7 @@ def select_k(
     texts_tok: List[List[str]],
     v_count: CountVectorizer,
     X_count,
-    k_range: range = range(6, 13),
+    k_range: range = range(5, 15),
     topn: int = 12,
 ) -> Tuple[int, Dict[int, float], str]:
     """

@@ -145,6 +145,8 @@ def main():
     parser.add_argument("--include-comments", action="store_true", help="Kommentare einbeziehen (Default: aus)")
     parser.add_argument("--max-comments-per-post", type=int, default=20)
     parser.add_argument("--min-docs-per-flair", type=int, default=40)
+    parser.add_argument("--kmin", type=int, default=6)
+    parser.add_argument("--kmax", type=int, default=13)
     args = parser.parse_args()
 
     fetched = fetch_subreddit_posts(
@@ -177,9 +179,10 @@ def main():
     texts_tok = df["text_all"].map(lambda s: tokenize(s)).tolist()
     texts_joined = [" ".join(toks) for toks in texts_tok]
 
-    lda, v_count, X_count, best_k, k_diag, metric_used = fit_lda_with_k(texts_tok, texts_joined, k_range=range(6, 13), topn=12)
+    lda, v_count, X_count, best_k, k_diag, metric_used = fit_lda_with_k(
+        texts_tok, texts_joined, k_range=range(args.kmin, args.kmax + 1), topn=12
+    )
     lda_terms_global = terms_for_topics(lda, v_count, topn=12)
-    doc_topic = lda.transform(X_count)
 
     # LSA (robust; wird ggf. ausgelassen)
     try:
@@ -200,7 +203,9 @@ def main():
         if len(grp) >= args.min_docs_per_flair:
             tok = grp["text_all"].map(lambda s: [t for t in clean_text(s).split() if t]).tolist()
             joined = [" ".join(t) for t in tok]
-            lda_f, v_c_f, X_c_f, best_k_f, _, _ = fit_lda_with_k(tok, joined, k_range=range(6, 13), topn=12)
+            lda_f, v_c_f, X_c_f, best_k_f, _, _ = fit_lda_with_k(
+                tok, joined, k_range=range(args.kmin, args.kmax + 1), topn=12
+            )
             blk["lda_terms"] = terms_for_topics(lda_f, v_c_f, topn=12)
             try:
                 blk["lsa_terms"] = lsa_top_terms(joined, requested_topics=min(8, max(6, best_k_f)), topn=12)
