@@ -3,4 +3,5 @@ python-dotenv
 pandas
 numpy
 scikit-learn
+gensim
 nltk

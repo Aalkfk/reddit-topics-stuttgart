@@ -16,6 +16,10 @@ except Exception as e:
 
 @dataclass
 class PostRecord:
+    """Flache Repräsentation eines Reddit-Posts
+    - `created_utc`: UNIX‑Zeitstempel
+    - `flair_text`: kann `None` sein, wenn der Post kein Flair hat
+    """
     id: str
     created_utc: float
     author: str
@@ -29,6 +33,9 @@ class PostRecord:
 
 @dataclass
 class CommentRecord:
+    """Minimale Repräsentation eines Kommentars eines Posts
+    Wird nur gefüllt, wenn `include_comments=True` und `max_comments_per_post>0`
+    """
     post_id: str
     comment_id: str
     author: str
@@ -36,6 +43,9 @@ class CommentRecord:
 
 
 def _mk_reddit() -> "praw.Reddit":
+    """Erzeugt den PRAW‑Client aus `.env`.
+    Erwartet: `REDDIT_CLIENT_ID`, `REDDIT_CLIENT_SECRET` und `REDDIT_USER_AGENT` (Optional, wichtig lt. API-Doku zwecks Reddit-Log)
+    """
     load_dotenv()
     return praw.Reddit(
         client_id=os.getenv("REDDIT_CLIENT_ID"),
@@ -54,11 +64,14 @@ def fetch_subreddit_posts(
     max_comments_per_post: int = 0,
     throttle_sec: float = 0.0,
 ) -> Dict[str, pd.DataFrame]:
-    """Gemäß Konzept: Posts der letzten 12 Monate (Default) via Reddit-API; Kommentare optional."""
+    """Zieht Posts (und optional Top‑Kommentare) aus `r/<subreddit>` im angegebenen Zeitraum.
+
+    Default‑Zeitraum: letzte 12 Monate. Ergebnisse werden chronologisch absteigend sortiert zurückgegeben.
+    """
     reddit = _mk_reddit()
     sr = reddit.subreddit(subreddit)
 
-    # Zeitraum vorbereiten
+    # Zeitraum vorbereiten (In UTC)
     if end:
         end_ts = datetime.fromisoformat(end).replace(tzinfo=timezone.utc).timestamp()
     else:
@@ -73,7 +86,7 @@ def fetch_subreddit_posts(
     posts: List[PostRecord] = []
     comments: List[CommentRecord] = []
 
-    # Wir nutzen nur new() und filtern per Datum, bis wir unter start_ts fallen
+    # `new()` streamen und per Zeitfenster filtern, bis `start_ts` unterschritten wird.
     count = 0
     for s in sr.new(limit=limit):
         created = float(getattr(s, "created_utc", 0.0))

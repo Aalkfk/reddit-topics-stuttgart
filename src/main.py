@@ -1,4 +1,3 @@
-# /src/main.py
 import os
 import argparse
 from datetime import datetime, timedelta, timezone
@@ -145,8 +144,8 @@ def main():
     parser.add_argument("--include-comments", action="store_true", help="Kommentare einbeziehen (Default: aus)")
     parser.add_argument("--max-comments-per-post", type=int, default=20)
     parser.add_argument("--min-docs-per-flair", type=int, default=40)
-    parser.add_argument("--kmin", type=int, default=6)
-    parser.add_argument("--kmax", type=int, default=13)
+    parser.add_argument("--kmin", type=int, default=5)
+    parser.add_argument("--kmax", type=int, default=15)
     args = parser.parse_args()
 
     fetched = fetch_subreddit_posts(
